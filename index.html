@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090e18">
+  <meta name="description" content="Neon Survivor — an endless neon arena survival game. Move, survive, and choose your upgrades.">
+  <title>Neon Survivor</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23080d16'/%3E%3Cpath%20d='M18%203%206%2018h9l-1%2011%2012-16h-9z'%20fill='%2359f6c7'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <script src="game.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Neon Survivor home">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M18 3 6 18h9l-1 11 12-16h-9z"/></svg></span>
+        <span class="brand-copy"><span class="brand-name">NEON<span>SURVIVOR</span></span><span class="brand-tagline">THE ENDLESS ARENA</span></span>
+      </a>
+      <div class="header-right"><span class="system-status"><span class="status-light" aria-hidden="true"></span> SYSTEM ONLINE</span><span class="version">V.01</span></div>
+    </header>
+
+    <main>
+      <div class="session-heading"><span class="section-label"><span class="label-slash">//</span> SURVIVAL PROTOCOL</span><span class="session-state" id="statusValue">STANDBY</span></div>
+
+      <section class="hud" aria-label="Player statistics">
+        <div class="resource-stats">
+          <div class="resource health-resource">
+            <div class="resource-heading"><span class="resource-label"><span class="health-symbol" aria-hidden="true">+</span> VITALS</span><span id="hpValue">100 / 100</span></div>
+            <div id="hpBar" class="resource-bar" role="progressbar" aria-label="Health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><div id="hpFill" class="resource-fill health-fill"></div></div>
+          </div>
+          <div class="resource xp-resource">
+            <div class="resource-heading"><span class="resource-label"><span class="xp-symbol" aria-hidden="true">◇</span> EXPERIENCE</span><span id="xpValue">0 / 20</span></div>
+            <div id="xpBar" class="resource-bar" role="progressbar" aria-label="Experience toward next level" aria-valuemin="0" aria-valuemax="20" aria-valuenow="0"><div id="xpFill" class="resource-fill xp-fill"></div></div>
+          </div>
+        </div>
+        <div class="stat"><span class="stat-label">LEVEL</span><span id="levelValue" class="stat-value level-stat">01</span></div>
+        <div class="stat"><span class="stat-label">ELIMINATIONS</span><span id="killValue" class="stat-value">0</span></div>
+        <div class="stat timer-stat"><span class="stat-label">TIME SURVIVED</span><span id="timeValue" class="stat-value">00:00</span></div>
+        <div class="stat wave-stat"><span class="stat-label">WAVE</span><span id="waveValue" class="stat-value">01</span></div>
+        <button id="pauseButton" class="pause-button" type="button" aria-label="Pause game (P or Escape)" title="Pause (P / Esc)" disabled><span aria-hidden="true">II</span></button>
+      </section>
+
+      <section id="arena" class="arena" aria-label="Game arena">
+        <canvas id="gameCanvas" tabindex="0" aria-label="Neon Survivor playfield. Move with WASD or arrow keys. Your weapon automatically targets the nearest enemy.">Your browser needs canvas support to play Neon Survivor.</canvas>
+        <div class="arena-corner corner-top-left" aria-hidden="true"></div><div class="arena-corner corner-top-right" aria-hidden="true"></div><div class="arena-corner corner-bottom-left" aria-hidden="true"></div><div class="arena-corner corner-bottom-right" aria-hidden="true"></div>
+        <div class="arena-coordinate" aria-hidden="true">SECTOR 07 <span>×</span> LIVE SIMULATION</div>
+        <div id="bossWarning" class="boss-warning" aria-live="polite" hidden></div>
+        <div id="bossBar" class="boss-bar" hidden>
+          <div class="boss-bar-heading"><span id="bossName">OVERLORD</span><span id="bossHpValue"></span></div>
+          <div class="boss-bar-track"><div id="bossHpFill"></div></div>
+        </div>
+
+        <div id="startScreen" class="screen start-screen">
+          <div class="screen-panel start-panel">
+            <div class="protocol-icon" aria-hidden="true"><span></span><span></span><span></span></div>
+            <p class="eyebrow">SURVIVAL IS THE ONLY OBJECTIVE</p>
+            <h1>One arena.<br><span>No way out.</span></h1>
+            <p class="screen-description">Keep moving. Your weapon does the rest.<br>Outlast the swarm and build your own advantage.</p>
+            <button id="playButton" class="button button-primary" type="button"><span>PLAY NOW</span><span class="button-arrow" aria-hidden="true">↗</span></button>
+            <div class="start-features"><span><strong>100</strong> STARTING HP</span><span><strong>∞</strong> ENEMY WAVES</span><span><strong>60s</strong> BOSS INTERVAL</span></div>
+            <p class="start-tip"><span class="tip-dot" aria-hidden="true"></span> Three upgrades. One choice. Every level.</p>
+          </div>
+        </div>
+
+        <div id="upgradeScreen" class="screen upgrade-screen" hidden>
+          <div class="screen-panel upgrade-panel" role="dialog" aria-modal="true" aria-labelledby="upgradeTitle">
+            <p class="eyebrow">EVOLVE TO SURVIVE</p>
+            <h2 id="upgradeTitle">System upgrade<span class="title-period">.</span></h2>
+            <p class="screen-description">Level <span id="upgradeLevel">2</span> reached. Choose your next advantage.</p>
+            <div id="upgradeChoices" class="upgrade-choices"></div>
+            <p class="overlay-hint">CLICK TO SELECT <span>OR PRESS</span> <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></p>
+          </div>
+        </div>
+
+        <div id="pauseScreen" class="screen" hidden>
+          <div class="screen-panel compact-panel" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+            <div class="pause-emblem" aria-hidden="true">II</div>
+            <p class="eyebrow">SIMULATION ON HOLD</p>
+            <h2 id="pauseTitle">Take a breath<span class="title-period">.</span></h2>
+            <p class="screen-description">The arena will be here when you're ready.</p>
+            <button id="resumeButton" class="button button-primary" type="button"><span>RESUME GAME</span><span class="button-arrow" aria-hidden="true">→</span></button>
+            <p class="overlay-hint">OR PRESS <kbd>P</kbd> / <kbd>ESC</kbd></p>
+          </div>
+        </div>
+
+        <div id="gameOverScreen" class="screen game-over-screen" hidden>
+          <div class="screen-panel compact-panel" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
+            <div class="game-over-emblem" aria-hidden="true">×</div>
+            <p class="eyebrow">SIGNAL LOST</p>
+            <h2 id="gameOverTitle">Run terminated<span class="title-period">.</span></h2>
+            <p class="screen-description">Every run is a chance to go further.</p>
+            <div class="final-stats"><div><span>TIME SURVIVED</span><strong id="finalTime">00:00</strong></div><div><span>ELIMINATIONS</span><strong id="finalKills">0</strong></div><div><span>LEVEL REACHED</span><strong id="finalLevel">1</strong></div></div>
+            <button id="restartButton" class="button button-primary" type="button"><span>TRY AGAIN</span><span class="button-arrow" aria-hidden="true">↻</span></button>
+          </div>
+        </div>
+
+        <div id="touchControls" class="touch-controls" aria-label="Touch movement controls"><button data-direction="up" class="touch-up" type="button" aria-label="Move up">↑</button><button data-direction="left" class="touch-left" type="button" aria-label="Move left">←</button><button data-direction="down" class="touch-down" type="button" aria-label="Move down">↓</button><button data-direction="right" class="touch-right" type="button" aria-label="Move right">→</button></div>
+        <div class="arena-footer" aria-hidden="true"><span><span class="status-light"></span> AUTO-TARGET ENGAGED</span><span>STAY IN MOTION</span></div>
+      </section>
+
+      <div class="game-guide">
+        <div class="control-guide"><span class="guide-label">CONTROLS</span><div class="move-keys"><kbd>W</kbd><span><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span></div><span>MOVE</span><span class="guide-divider"></span><kbd>P</kbd><span>PAUSE</span><span class="guide-divider"></span><span class="auto-fire-icon" aria-hidden="true">⌖</span><span>AUTO-FIRE</span></div>
+        <div class="enemy-guide" aria-label="Enemy types"><span class="guide-label">THREATS</span><span><i class="enemy-dot basic-dot" aria-hidden="true"></i> DRONE</span><span><i class="enemy-dot fast-dot" aria-hidden="true"></i> RUNNER</span><span><i class="enemy-dot tank-dot" aria-hidden="true"></i> TANK</span></div>
+      </div>
+    </main>
+    <footer class="site-footer"><span>BUILT TO SURVIVE. DESIGNED TO REPLAY.</span><span>NO DOWNLOADS. JUST YOU AND THE SWARM.</span></footer>
+  </div>
+</body>
+</html>
